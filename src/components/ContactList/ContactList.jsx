@@ -1,46 +1,44 @@
 import { useEffect } from 'react';
 import { toast } from 'react-hot-toast';
-import { useDispatch, useSelector } from 'react-redux';
-
-import {
-  selectError,
-  selectFilterContacts,
-  selectIsLoading,
-} from 'redux/contacts/contactsSelectors';
-import { fetchContacts } from 'redux/contacts/contactsOperations';
+import { useSelector } from 'react-redux';
+import { selectFilter } from 'redux/filterSlice';
 
 import { Loader } from 'components/Loader/Loader';
 import { ContactItem } from '../ContactItem/ContactItem';
+import { useFetchContactsQuery } from 'redux/contacts/contactAPI';
 
 export const ContactList = () => {
-  const error = useSelector(selectError);
-  const loading = useSelector(selectIsLoading);
-  const filterContacts = useSelector(selectFilterContacts);
-  const dispatch = useDispatch();
+  const filter = useSelector(selectFilter);
+
+  const { data, isError, isLoading, error } = useFetchContactsQuery();
 
   useEffect(() => {
-    dispatch(fetchContacts());
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (error !== null) {
-      toast.error(`Sorry, but ${error} `);
+    if (isError) {
+      const { status, originalStatus } = error;
+      toast.error(`Sorry, but ${status}. STATUS: ${originalStatus} `);
       return;
     }
-  }, [error]);
+  }, [error, isError]);
+
+  if (isLoading) {
+    return <Loader />;
+  }
+
+  const filterContacts = data?.filter(contact =>
+    contact.name.toLowerCase().includes(filter.toLowerCase())
+  );
 
   return (
     <>
-      {filterContacts.length !== 0 ? (
+      {filterContacts?.length !== 0 ? (
         <ul>
-          {filterContacts.map(({ id, name, phone, createdAt }) => (
+          {filterContacts?.map(({ id, name, phone, createdAt }) => (
             <ContactItem key={id} contact={{ id, name, phone, createdAt }} />
           ))}
         </ul>
       ) : (
         <p>Please add contact</p>
       )}
-      {loading && <Loader />}
     </>
   );
 };

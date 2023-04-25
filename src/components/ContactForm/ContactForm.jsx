@@ -1,18 +1,19 @@
 import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import toast, { Toaster } from 'react-hot-toast';
 
-import { addContact } from 'redux/contacts/contactsOperations';
-import { selectContacts } from 'redux/contacts/contactsSelectors';
-
 import { Form } from './ContactForm.styled';
+import {
+  useAddContactsMutation,
+  useFetchContactsQuery,
+} from 'redux/contacts/contactAPI';
 
 export const ContactForm = () => {
   const [name, setName] = useState('');
-  const [number, setNumber] = useState('');
+  const [phone, setPhone] = useState('');
+  const [addContact] = useAddContactsMutation();
 
-  const dispatch = useDispatch();
-  const contacts = useSelector(selectContacts);
+  const { data: contacts } = useFetchContactsQuery();
+  const { isError } = useFetchContactsQuery();
 
   const addNewUser = e => {
     e.preventDefault();
@@ -22,11 +23,11 @@ export const ContactForm = () => {
       toast.success('contact is added');
       const newUser = {
         name,
-        phone: number,
+        phone,
       };
-      dispatch(addContact(newUser));
+      addContact(newUser);
       setName('');
-      setNumber('');
+      setPhone('');
     }
   };
 
@@ -35,8 +36,8 @@ export const ContactForm = () => {
       case 'name':
         setName(value);
         break;
-      case 'number':
-        setNumber(value);
+      case 'phone':
+        setPhone(value);
         break;
       default:
         break;
@@ -49,6 +50,7 @@ export const ContactForm = () => {
       <label>
         Name
         <input
+          disabled={isError}
           onChange={changeHandler}
           value={name}
           type="text"
@@ -61,16 +63,19 @@ export const ContactForm = () => {
       <label>
         Number
         <input
+          disabled={isError}
           onChange={changeHandler}
-          value={number}
+          value={phone}
           type="tel"
-          name="number"
+          name="phone"
           pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
           title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
           required
         />
       </label>
-      <button type="submit">Add User</button>
+      <button disabled={isError} type="submit">
+        Add User
+      </button>
     </Form>
   );
 };

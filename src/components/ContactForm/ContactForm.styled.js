@@ -25,5 +25,8 @@ export const Form = styled.form`
     &:hover {
       background-color: rgb(101, 101, 101, 0.5);
     }
+    &:disabled {
+      background-color: white;
+    }
   }
 `;

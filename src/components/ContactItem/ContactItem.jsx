@@ -1,27 +1,32 @@
 import PropTypes from 'prop-types';
 
-import { useRef, useState } from 'react';
-import { useDispatch } from 'react-redux';
-
-import { deleteContact } from 'redux/contacts/contactsOperations';
+import { useEffect, useRef, useState } from 'react';
 
 import { Item } from './ContactItem.styled';
+import { useDeleteContactMutation } from 'redux/contacts/contactAPI';
+import { toast } from 'react-hot-toast';
 
 export const ContactItem = ({ contact }) => {
   const [isHovered, setIsHovered] = useState(false);
   const del = useRef();
+  const [deleteContact, { isError, error }] = useDeleteContactMutation();
 
-  const dispatch = useDispatch();
+  useEffect(() => {
+    if (isError) {
+      const { status } = error;
+      toast.error(`Sorry, but we cant delete. STATUS: ${status} `);
+      return;
+    }
+  }, [error, isError]);
 
   const deleteItem = id => {
+    deleteContact(id);
     del.current.className += ' delete';
-    dispatch(deleteContact(id));
   };
 
   const { id, name, phone, createdAt } = contact;
 
   const date = new Date(createdAt);
-
   const options = {
     year: 'numeric',
     month: 'long',
@@ -33,7 +38,6 @@ export const ContactItem = ({ contact }) => {
     timeZone: 'Europe/Kiev',
   };
   const formatter = new Intl.DateTimeFormat('en-US', options);
-
   const formattedDate = formatter.format(date);
 
   return (
