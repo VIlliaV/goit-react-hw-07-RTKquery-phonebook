@@ -1,10 +1,11 @@
 import PropTypes from 'prop-types';
 
 import { useEffect, useRef, useState } from 'react';
+import { toast } from 'react-hot-toast';
 
 import { Item } from './ContactItem.styled';
 import { useDeleteContactMutation } from 'redux/contacts/contactAPI';
-import { toast } from 'react-hot-toast';
+import { date } from 'utils/date';
 
 export const ContactItem = ({ contact }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -26,19 +27,7 @@ export const ContactItem = ({ contact }) => {
 
   const { id, name, phone, createdAt } = contact;
 
-  const date = new Date(createdAt);
-  const options = {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric',
-    second: 'numeric',
-    hour12: true,
-    timeZone: 'Europe/Kiev',
-  };
-  const formatter = new Intl.DateTimeFormat('en-US', options);
-  const formattedDate = formatter.format(date);
+  const formattedDate = date(createdAt);
 
   return (
     <Item
